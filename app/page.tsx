@@ -1,12 +1,12 @@
 import { LogoMark } from "@/components/Logo";
 import { ProductCard } from "@/components/ProductCard";
 import { WhatsAppIcon } from "@/components/WhatsAppFloat";
-import { formatPrice, store, whatsappLink } from "@/lib/config";
+import { formatPrice, paymentLabels, store, whatsappLink } from "@/lib/config";
 import { products } from "@/lib/products";
 
 const features = [
   { title: "شحن سريع", text: `لجميع مدن المملكة، ومجاني فوق ${formatPrice(store.freeShippingFrom)}` },
-  { title: "دفع آمن", text: "مدى وفيزا وماستركارد أو الدفع عند الاستلام" },
+  { title: "دفع مرن", text: paymentLabels().join(" أو ") },
   { title: "أصالة مضمونة", text: "عود ودهن عود مختار من أجود المصادر" },
   { title: "دعم مباشر", text: "نرد عليك عبر واتساب طوال أيام الأسبوع" },
 ];
