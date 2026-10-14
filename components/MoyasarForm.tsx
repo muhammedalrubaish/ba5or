@@ -39,7 +39,7 @@ export function MoyasarForm({ amountHalalas, description, callbackUrl, metadata 
           metadata,
           apple_pay: {
             country: "SA",
-            label: store.name,
+            label: store.fullName,
             validate_merchant_url: "https://api.moyasar.com/v1/applepay/initiate",
           },
         });

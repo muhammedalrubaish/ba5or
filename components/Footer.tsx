@@ -26,7 +26,7 @@ export function Footer() {
         </div>
       </div>
       <div className="container footer-bottom muted">
-        © {new Date().getFullYear()} {store.name} — جميع الحقوق محفوظة
+        © {new Date().getFullYear()} {store.fullName} — جميع الحقوق محفوظة
       </div>
     </footer>
   );

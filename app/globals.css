@@ -64,6 +64,7 @@ input, select, textarea { font: inherit; }
 .logo { display: inline-flex; align-items: center; gap: .6rem; }
 .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
 .logo-name { font-family: var(--font-display), serif; font-size: 1.7rem; font-weight: 700; background: linear-gradient(180deg, #f6e2a0, #c9973f); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.logo-sub { font-size: .85rem; color: #d9c19a; font-weight: 500; }
 .logo-latin { font-size: .68rem; letter-spacing: .12em; color: #b9a38a; }
 
 /* الواجهة */

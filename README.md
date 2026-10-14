@@ -1,4 +1,4 @@
-# عَبَق — متجر بخور وعود
+# صفوة للبخور
 
 متجر إلكتروني مبني بـ Next.js، جاهز للنشر على Vercel.
 
@@ -33,7 +33,7 @@ npm run dev
    - `NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY` — المفتاح العام من ميسر
    - `MOYASAR_SECRET_KEY` — المفتاح السري من ميسر
    - `NEXT_PUBLIC_MOYASAR_METHODS` — مثلاً `creditcard` أو `creditcard,applepay,stcpay`
-   - `NEXT_PUBLIC_SITE_URL` — رابط موقعك النهائي، مثل `https://abaq.vercel.app`
+   - `NEXT_PUBLIC_SITE_URL` — رابط موقعك النهائي، مثل `https://ba5or.vercel.app`
 3. أعد النشر (Redeploy) بعد إضافة المتغيرات، لأن متغيرات `NEXT_PUBLIC_` تُضمَّن وقت البناء.
 
 مفاتيح ميسر اختيارية: بدونها يعمل المتجر بالتحويل البنكي والدفع عند الاستلام فقط.

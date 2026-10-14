@@ -25,7 +25,7 @@ export function QuickBuyModal({ product, onClose }: { product: Product; onClose:
     };
   }, [onClose]);
 
-  const waMessage = `السلام عليكم، أرغب بطلب:\n${product.name} (${product.unit}) × ${qty}\nالسعر: ${formatPrice(total)} + الشحن\nمن متجر ${store.name}`;
+  const waMessage = `السلام عليكم، أرغب بطلب:\n${product.name} (${product.unit}) × ${qty}\nالسعر: ${formatPrice(total)} + الشحن\nمن ${store.fullName}`;
 
   // يُعرض خارج البطاقة حتى لا يتأثر بتحريكها (transform يحبس position: fixed)
   return createPortal(

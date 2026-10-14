@@ -12,7 +12,7 @@ export function BuyBox({ product }: { product: Product }) {
   const router = useRouter();
   const { add } = useCart();
   const [qty, setQty] = useState(1);
-  const waMessage = `السلام عليكم، أرغب بطلب:\n${product.name} (${product.unit}) × ${qty}\nالسعر: ${formatPrice(product.price * qty)} + الشحن\nمن متجر ${store.name}`;
+  const waMessage = `السلام عليكم، أرغب بطلب:\n${product.name} (${product.unit}) × ${qty}\nالسعر: ${formatPrice(product.price * qty)} + الشحن\nمن ${store.fullName}`;
 
   return (
     <div className="buybox">

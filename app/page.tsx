@@ -22,7 +22,7 @@ export default function HomePage() {
           <div className="hero-mark">
             <LogoMark size={96} id="hero-logo" />
           </div>
-          <p className="eyebrow">{store.tagline}</p>
+          <p className="eyebrow">{store.fullName}</p>
           <h1>عبقٌ يبقى في المكان والذاكرة</h1>
           <p className="hero-text">
             بخور معمول، عود طبيعي، دهن عود معتّق ومباخر فاخرة — اطلب بضغطة واحدة وادفع بالطريقة التي تناسبك.

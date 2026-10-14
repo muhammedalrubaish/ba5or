@@ -48,7 +48,7 @@ export function decodeItems(value: string | undefined | null): CartItem[] {
 export function newOrderRef() {
   const t = Date.now().toString(36).toUpperCase().slice(-5);
   const r = Math.random().toString(36).toUpperCase().slice(2, 5);
-  return `AB-${t}${r}`;
+  return `SF-${t}${r}`;
 }
 
 export function orderMessage(opts: {
@@ -60,7 +60,7 @@ export function orderMessage(opts: {
   const { lines, subtotal, shipping, total } = priceOrder(opts.items);
   const c = opts.customer;
   return [
-    `طلب جديد من متجر ${store.name}`,
+    `طلب جديد من ${store.fullName}`,
     `رقم الطلب: ${opts.ref}`,
     "",
     ...lines.map((l) => `• ${l.product.name} × ${l.qty} = ${formatPrice(l.total)}`),

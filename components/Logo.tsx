@@ -1,6 +1,6 @@
 import { store } from "@/lib/config";
 
-// شعار عَبَق: مبخرة تقليدية يتصاعد منها ثلاث خيوط بخور
+// شعار صفوة: مبخرة تقليدية يتصاعد منها ثلاث خيوط بخور
 export function LogoMark({ size = 44, id = "logo" }: { size?: number; id?: string }) {
   const g = `${id}-gold`;
   return (
@@ -42,7 +42,11 @@ export function Logo({ id = "logo", compact = false }: { id?: string; compact?: 
       <LogoMark id={id} size={compact ? 36 : 44} />
       <span className="logo-text">
         <span className="logo-name">{store.name}</span>
-        {!compact && <span className="logo-latin">{store.nameLatin} · {store.tagline}</span>}
+        {!compact && (
+          <span className="logo-sub">
+            {store.tagline} <span className="logo-latin">· {store.nameLatin}</span>
+          </span>
+        )}
       </span>
     </span>
   );

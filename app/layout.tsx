@@ -13,9 +13,9 @@ const amiri = Amiri({ subsets: ["arabic", "latin"], weight: ["400", "700"], vari
 
 export const metadata: Metadata = {
   metadataBase: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : undefined,
-  title: { default: `${store.name} | ${store.tagline}`, template: `%s | ${store.name}` },
+  title: { default: `${store.fullName} | بخور وعود فاخر`, template: `%s | ${store.fullName}` },
   description: store.description,
-  openGraph: { title: `${store.name} | ${store.tagline}`, description: store.description, locale: "ar_SA", type: "website" },
+  openGraph: { title: store.fullName, description: store.description, locale: "ar_SA", type: "website", siteName: store.fullName },
 };
 
 export const viewport: Viewport = { themeColor: "#1a0f0a" };

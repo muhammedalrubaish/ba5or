@@ -12,7 +12,7 @@ export function WhatsAppFloat() {
   return (
     <a
       className="wa-float"
-      href={whatsappLink(`السلام عليكم، لدي استفسار عن منتجات ${store.name}`)}
+      href={whatsappLink(`السلام عليكم، لدي استفسار عن منتجات ${store.fullName}`)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`تواصل عبر واتساب ${store.whatsappDisplay}`}

@@ -261,7 +261,7 @@ export function CheckoutClient() {
             </p>
             <MoyasarForm
               amountHalalas={Math.round(order.total * 100)}
-              description={`طلب ${ref} من ${store.name}`}
+              description={`طلب ${ref} من ${store.fullName}`}
               callbackUrl={callbackUrl}
               metadata={{
                 order_ref: ref,
