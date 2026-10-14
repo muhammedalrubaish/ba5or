@@ -365,3 +365,6 @@ input, select, textarea { font: inherit; }
   .mgr-row { grid-template-columns: 1fr; gap: 0; }
   .invoice { padding: 1.25rem; }
 }
+.mgr-settings { display: grid; gap: 1rem; max-width: 720px; }
+.mgr-settings .panel h2 { margin-top: 0; }
+.mgr-settings > .btn { justify-self: start; }

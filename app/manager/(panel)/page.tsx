@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { formatPrice } from "@/lib/config";
-import { getCatalog, listOrders } from "@/lib/db";
+import { getCatalog, getSettingsFresh, listOrders } from "@/lib/db";
+import { bankConfigured } from "@/lib/settings";
 import { riyadhDayKey } from "@/lib/format";
 import { OrdersTable } from "./OrdersTable";
 
 export default async function Dashboard() {
-  const [orders, catalog] = await Promise.all([listOrders(500), getCatalog()]);
+  const [orders, catalog, settings] = await Promise.all([listOrders(500), getCatalog(), getSettingsFresh()]);
   const today = riyadhDayKey(Date.now());
   const todays = orders.filter((o) => riyadhDayKey(o.createdAt) === today);
   const pending = orders.filter((o) => o.status === "new" || o.status === "awaiting_payment");
@@ -23,6 +24,12 @@ export default async function Dashboard() {
   return (
     <>
       <h1 className="mgr-title">الرئيسية</h1>
+      {!bankConfigured(settings) && (
+        <p className="alert">
+          لم تُضف بيانات الآيبان بعد، فلا يرى عملاء التحويل البنكي رقم الحساب.{" "}
+          <Link href="/manager/settings" className="mgr-link">أضفها من الإعدادات</Link>
+        </p>
+      )}
       <div className="mgr-stats">
         {stats.map((s) => (
           <Link key={s.label} href={s.href} className="mgr-stat">

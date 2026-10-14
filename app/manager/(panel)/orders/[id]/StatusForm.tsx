@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import { setOrderStatus } from "@/app/manager/actions";
 import type { OrderStatus } from "@/lib/db";
 
@@ -14,9 +14,9 @@ const options: [OrderStatus, string][] = [
 ];
 
 export function StatusForm({ id, status, adminNote }: { id: string; status: OrderStatus; adminNote?: string }) {
-  const [state, action, pending] = useActionState(setOrderStatus, undefined);
+  const [state, onSubmit, pending] = useFormAction(setOrderStatus, undefined);
   return (
-    <form action={action}>
+    <form onSubmit={onSubmit}>
       <input type="hidden" name="id" value={id} />
       <label className="field">
         <span>الحالة</span>

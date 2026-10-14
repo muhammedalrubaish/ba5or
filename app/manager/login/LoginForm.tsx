@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import { login } from "../actions";
 
 export function LoginForm() {
-  const [state, action, pending] = useActionState(login, undefined);
+  const [state, onSubmit, pending] = useFormAction(login, undefined);
   return (
-    <form action={action} className="mgr-form">
+    <form onSubmit={onSubmit} className="mgr-form">
       <label className="field">
         <span>البريد الإلكتروني</span>
         <input name="email" type="email" autoComplete="username" dir="ltr" required />

@@ -10,23 +10,10 @@ export const store = {
   whatsappDisplay: "+966 50 152 3258",
   currency: "SAR",
   currencyLabel: "ر.س",
+  // القيم الافتراضية للشحن — تُعدّل من لوحة التحكم ← الإعدادات
   shippingFee: 25,
   freeShippingFrom: 300,
 };
-
-// بيانات الحساب البنكي للتحويل (آيبان). اكتبها هنا وستظهر للعميل بعد تأكيد الطلب.
-// إن تركتها فارغة يُبلَّغ العميل أن بيانات الحساب ستُرسل له عبر واتساب.
-export const bank = {
-  name: "", // اسم البنك، مثل: مصرف الراجحي
-  holder: "", // اسم صاحب الحساب كما هو في البنك
-  iban: "", // مثل: SA0000000000000000000000
-};
-
-export const bankConfigured = Boolean(bank.iban && bank.holder);
-
-export function formatIban(iban: string) {
-  return iban.replace(/\s/g, "").toUpperCase().replace(/(.{4})/g, "$1 ").trim();
-}
 
 export const cities = [
   "الرياض",

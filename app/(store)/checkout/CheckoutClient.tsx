@@ -7,12 +7,10 @@ import { MoyasarForm } from "@/components/MoyasarForm";
 import { ProductArt } from "@/components/ProductArt";
 import { WhatsAppIcon } from "@/components/WhatsAppFloat";
 import { useCart } from "@/lib/cart";
-import { useCatalog } from "@/lib/catalog";
+import { useCatalog, useStoreSettings } from "@/lib/catalog";
+import { bankConfigured, formatIban } from "@/lib/settings";
 import {
-  bank,
-  bankConfigured,
   cities,
-  formatIban,
   formatPrice,
   onlineMethods,
   onlinePaymentEnabled,
@@ -41,9 +39,11 @@ export function CheckoutClient() {
   const buy = params.get("buy");
   const cart = useCart();
   const catalog = useCatalog();
+  const settings = useStoreSettings();
+  const bank = settings.bank;
 
   const items = useMemo(() => (buy ? decodeItems(buy) : cart.items), [buy, cart.items]);
-  const order = priceOrder(items, catalog);
+  const order = priceOrder(items, catalog, settings);
   const source = buy ? "quick" : "cart";
 
   const [customer, setCustomer] = useState<Customer>(emptyCustomer);
@@ -74,7 +74,7 @@ export function CheckoutClient() {
         <p className="muted">حوّل مبلغ الطلب إلى الحساب التالي، ثم أرسل صورة إيصال التحويل عبر واتساب لنبدأ تجهيز طلبك.</p>
         <div className="bank-box">
           <div className="bank-row"><span>المبلغ</span><strong>{formatPrice(paidTotal)}</strong></div>
-          {bankConfigured ? (
+          {bankConfigured(settings) ? (
             <>
               {bank.name && <div className="bank-row"><span>البنك</span><strong>{bank.name}</strong></div>}
               <div className="bank-row"><span>اسم المستفيد</span><strong>{bank.holder}</strong></div>
@@ -314,7 +314,7 @@ export function CheckoutClient() {
         <div className="sum-row"><span>الشحن</span><span>{order.shipping === 0 ? "مجاني" : formatPrice(order.shipping)}</span></div>
         <div className="sum-row sum-total"><span>الإجمالي</span><span>{formatPrice(order.total)}</span></div>
         {order.shipping > 0 && (
-          <p className="muted small">الشحن مجاني للطلبات من {formatPrice(store.freeShippingFrom)}</p>
+          <p className="muted small">الشحن مجاني للطلبات من {formatPrice(settings.freeShippingFrom)}</p>
         )}
       </aside>
     </div>

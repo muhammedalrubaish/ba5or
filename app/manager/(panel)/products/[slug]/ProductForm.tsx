@@ -1,15 +1,16 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import { saveProduct } from "@/app/manager/actions";
 import { categories, type Product } from "@/lib/products";
 
 export function ProductForm({ product, blobEnabled }: { product?: Product; blobEnabled: boolean }) {
-  const [state, action, pending] = useActionState(saveProduct, undefined);
+  const [state, onSubmit, pending] = useFormAction(saveProduct, undefined);
   const [preview, setPreview] = useState<string | undefined>(product?.image);
 
   return (
-    <form action={action} className="panel mgr-product-form">
+    <form onSubmit={onSubmit} className="panel mgr-product-form">
       <input type="hidden" name="originalSlug" value={product?.slug ?? ""} />
 
       <div className="mgr-form-grid">

@@ -2,17 +2,17 @@ import { LogoMark } from "@/components/Logo";
 import { ProductCard } from "@/components/ProductCard";
 import { WhatsAppIcon } from "@/components/WhatsAppFloat";
 import { formatPrice, paymentLabels, store, whatsappLink } from "@/lib/config";
-import { getVisibleProducts } from "@/lib/db";
-
-const features = [
-  { title: "شحن سريع", text: `لجميع مدن المملكة، ومجاني فوق ${formatPrice(store.freeShippingFrom)}` },
-  { title: "دفع مرن", text: paymentLabels().join(" أو ") },
-  { title: "أصالة مضمونة", text: "عود طبيعي مختار من أجود المصادر" },
-  { title: "دعم مباشر", text: "نرد عليك عبر واتساب طوال أيام الأسبوع" },
-];
+import { getSettings, getVisibleProducts } from "@/lib/db";
 
 export default async function HomePage() {
-  const products = await getVisibleProducts();
+  const [products, settings] = await Promise.all([getVisibleProducts(), getSettings()]);
+  const features = [
+    { title: "شحن سريع", text: `لجميع مدن المملكة، ومجاني فوق ${formatPrice(settings.freeShippingFrom)}` },
+    { title: "دفع مرن", text: paymentLabels().join(" أو ") },
+    { title: "أصالة مضمونة", text: "عود طبيعي مختار من أجود المصادر" },
+    { title: "دعم مباشر", text: "نرد عليك عبر واتساب طوال أيام الأسبوع" },
+  ];
+
   return (
     <main>
       <section className="hero">

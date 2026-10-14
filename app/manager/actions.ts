@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { checkCredentials, createSession, destroySession, requireAdmin } from "@/lib/auth";
 import {
   CATALOG_TAG,
+  SETTINGS_TAG,
   clearFailedLogins,
   dbEnabled,
   getCatalogFresh,
@@ -14,10 +15,12 @@ import {
   orderStatusLabel,
   recordFailedLogin,
   saveCatalog,
+  saveSettings,
   updateOrder,
   type OrderStatus,
 } from "@/lib/db";
 import { categories, type Product } from "@/lib/products";
+import { cleanIban, isValidSaudiIban, type StoreSettings } from "@/lib/settings";
 
 export type FormState = { error?: string; ok?: string } | undefined;
 
@@ -159,4 +162,35 @@ export async function setOrderStatus(_prev: FormState, form: FormData): Promise<
   if (!updated) return { error: "الطلب غير موجود" };
   revalidatePath("/manager", "layout");
   return { ok: "تم الحفظ" };
+}
+
+// ---------- الإعدادات ----------
+
+export async function saveStoreSettings(_prev: FormState, form: FormData): Promise<FormState> {
+  await requireAdmin();
+  if (!dbEnabled) return { error: "اربط قاعدة البيانات (Upstash Redis) من Vercel أولاً لحفظ الإعدادات." };
+
+  const bankName = String(form.get("bankName") ?? "").trim().slice(0, 60);
+  const holder = String(form.get("holder") ?? "").trim().slice(0, 100);
+  const iban = cleanIban(String(form.get("iban") ?? ""));
+  const shippingFee = Number(form.get("shippingFee"));
+  const freeShippingFrom = Number(form.get("freeShippingFrom"));
+
+  if (iban && !isValidSaudiIban(iban)) {
+    return { error: "رقم الآيبان غير صحيح. يجب أن يبدأ بـ SA ويتكون من 24 خانة، تأكد من كل رقم." };
+  }
+  if (iban && holder.length < 3) return { error: "اكتب اسم صاحب الحساب كما هو في البنك" };
+  if (!Number.isFinite(shippingFee) || shippingFee < 0) return { error: "رسوم الشحن يجب أن تكون صفراً أو أكثر" };
+  if (!Number.isFinite(freeShippingFrom) || freeShippingFrom < 0) return { error: "حد الشحن المجاني يجب أن يكون صفراً أو أكثر" };
+
+  const settings: StoreSettings = {
+    bank: { name: bankName, holder, iban },
+    shippingFee: Math.round(shippingFee * 100) / 100,
+    freeShippingFrom: Math.round(freeShippingFrom * 100) / 100,
+    updatedAt: Date.now(),
+  };
+  await saveSettings(settings);
+  updateTag(SETTINGS_TAG);
+  revalidatePath("/", "layout");
+  return { ok: "تم حفظ الإعدادات، وظهرت للعملاء فوراً" };
 }

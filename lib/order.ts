@@ -1,5 +1,6 @@
 import { formatPrice, store } from "./config";
 import { findProduct, type Product } from "./products";
+import type { StoreSettings } from "./settings";
 
 export type CartItem = { slug: string; qty: number };
 export type OrderLine = { product: Product; qty: number; total: number };
@@ -25,7 +26,11 @@ export const paymentMethodLabel: Record<PaymentMethod, string> = {
 
 // يُستخدم في المتصفح والخادم معاً، والخادم يعيد الحساب من الكتالوج ولا يثق بأي سعر من المتصفح.
 // المنتجات المخفية لا تُباع.
-export function priceOrder(items: CartItem[], catalog: Product[]): PricedOrder {
+export function priceOrder(
+  items: CartItem[],
+  catalog: Product[],
+  shipping: Pick<StoreSettings, "shippingFee" | "freeShippingFrom">
+): PricedOrder {
   const lines: OrderLine[] = [];
   for (const item of items) {
     const product = findProduct(catalog, item.slug);
@@ -34,8 +39,8 @@ export function priceOrder(items: CartItem[], catalog: Product[]): PricedOrder {
     lines.push({ product, qty, total: product.price * qty });
   }
   const subtotal = lines.reduce((sum, l) => sum + l.total, 0);
-  const shipping = subtotal === 0 || subtotal >= store.freeShippingFrom ? 0 : store.shippingFee;
-  return { lines, subtotal, shipping, total: subtotal + shipping };
+  const fee = subtotal === 0 || subtotal >= shipping.freeShippingFrom ? 0 : shipping.shippingFee;
+  return { lines, subtotal, shipping: fee, total: subtotal + fee };
 }
 
 // صيغة مضغوطة للمنتجات تُرسل مع عملية الدفع: slug:qty,slug:qty

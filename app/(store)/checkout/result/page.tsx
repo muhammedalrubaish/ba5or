@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { formatPrice, store } from "@/lib/config";
 import { fetchPayment, type MoyasarPayment } from "@/lib/moyasar";
-import { getCatalog, getOrder, updateOrder } from "@/lib/db";
+import { getCatalog, getOrder, getSettings, updateOrder } from "@/lib/db";
 import { decodeItems, orderMessage, priceOrder } from "@/lib/order";
 import { PaidActions } from "./PaidActions";
 
@@ -48,7 +48,7 @@ export default async function ResultPage({ searchParams }: Props) {
   const ref = meta.order_ref || payment.id.slice(0, 8);
   const saved = meta.order_ref ? await getOrder(meta.order_ref).catch(() => null) : null;
   // سطور الطلب: من الطلب المحفوظ إن وُجد، وإلا نعيد حسابها من الكتالوج
-  const priced = priceOrder(decodeItems(meta.items), await getCatalog());
+  const priced = priceOrder(decodeItems(meta.items), await getCatalog(), await getSettings());
   const lines = saved
     ? saved.lines.map((l) => ({ key: l.slug, name: l.name, qty: l.qty, total: l.total }))
     : priced.lines.map((l) => ({ key: l.product.slug, name: l.product.name, qty: l.qty, total: l.total }));

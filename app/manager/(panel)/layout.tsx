@@ -17,6 +17,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <Link href="/manager">الرئيسية</Link>
             <Link href="/manager/orders">الطلبات</Link>
             <Link href="/manager/products">المنتجات</Link>
+            <Link href="/manager/settings">الإعدادات</Link>
             <Link href="/" target="_blank">المتجر ↗</Link>
           </nav>
           <form action={logout}>

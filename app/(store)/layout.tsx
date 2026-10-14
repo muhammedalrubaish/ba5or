@@ -4,12 +4,12 @@ import { Header } from "@/components/Header";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { CartProvider } from "@/lib/cart";
 import { CatalogProvider } from "@/lib/catalog";
-import { getVisibleProducts } from "@/lib/db";
+import { getSettings, getVisibleProducts } from "@/lib/db";
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
-  const products = await getVisibleProducts();
+  const [products, settings] = await Promise.all([getVisibleProducts(), getSettings()]);
   return (
-    <CatalogProvider products={products}>
+    <CatalogProvider products={products} settings={settings}>
       <CartProvider>
         <Header />
         {children}

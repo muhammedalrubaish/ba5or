@@ -1,6 +1,6 @@
 "use server";
 
-import { createOrder, getCatalog } from "@/lib/db";
+import { createOrder, getCatalog, getSettings } from "@/lib/db";
 import {
   MAX_QTY,
   newOrderRef,
@@ -45,7 +45,8 @@ export async function placeOrder(input: { items: CartItem[]; customer: Customer;
   const items = input.items
     .map((i) => ({ slug: String(i.slug), qty: Math.min(MAX_QTY, Math.floor(Number(i.qty))) }))
     .filter((i) => i.qty > 0);
-  const priced = priceOrder(items, await getCatalog());
+  const [catalog, settings] = await Promise.all([getCatalog(), getSettings()]);
+  const priced = priceOrder(items, catalog, settings);
   if (priced.lines.length === 0) return { ok: false, error: "المنتجات المطلوبة لم تعد متوفرة" };
 
   const ref = newOrderRef();

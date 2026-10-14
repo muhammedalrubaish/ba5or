@@ -4,6 +4,7 @@ import { Redis } from "@upstash/redis";
 import { unstable_cache } from "next/cache";
 import type { Customer, PaymentMethod } from "./order";
 import { seedProducts, type Product } from "./products";
+import { defaultSettings, type StoreSettings } from "./settings";
 
 const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
@@ -13,6 +14,7 @@ const redis = dbEnabled ? new Redis({ url: url!, token: token! }) : null;
 
 const K = {
   products: "safwa:products",
+  settings: "safwa:settings",
   orders: "safwa:orders",
   order: (id: string) => `safwa:order:${id}`,
   invoiceSeq: "safwa:invoice-seq",
@@ -20,6 +22,7 @@ const K = {
 };
 
 export const CATALOG_TAG = "catalog";
+export const SETTINGS_TAG = "settings";
 
 // ---------- المنتجات ----------
 
@@ -43,6 +46,22 @@ export async function getVisibleProducts() {
 export async function saveCatalog(products: Product[]) {
   if (!redis) throw new Error("DB_DISABLED");
   await redis.set(K.products, products);
+}
+
+// ---------- الإعدادات (الآيبان والشحن) ----------
+
+async function readSettings(): Promise<StoreSettings> {
+  if (!redis) return defaultSettings;
+  const saved = await redis.get<StoreSettings>(K.settings);
+  return saved ? { ...defaultSettings, ...saved, bank: { ...defaultSettings.bank, ...saved.bank } } : defaultSettings;
+}
+
+export const getSettings = unstable_cache(readSettings, ["settings-v1"], { tags: [SETTINGS_TAG] });
+export const getSettingsFresh = readSettings;
+
+export async function saveSettings(settings: StoreSettings) {
+  if (!redis) throw new Error("DB_DISABLED");
+  await redis.set(K.settings, settings);
 }
 
 // ---------- الطلبات ----------
