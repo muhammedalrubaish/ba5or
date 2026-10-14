@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { MAX_QTY, type CartItem } from "./order";
+import { getProduct } from "./products";
 
 type CartContextValue = {
   items: CartItem[];
@@ -27,7 +28,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setItems(JSON.parse(saved));
+      // نتجاهل أي منتج حُذف من المتجر بعد أن أضافه العميل لسلته
+      if (saved) setItems((JSON.parse(saved) as CartItem[]).filter((i) => getProduct(i.slug)));
     } catch {
       // التخزين غير متاح — نكمل بسلة فارغة
     }

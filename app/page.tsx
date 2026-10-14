@@ -7,7 +7,7 @@ import { products } from "@/lib/products";
 const features = [
   { title: "شحن سريع", text: `لجميع مدن المملكة، ومجاني فوق ${formatPrice(store.freeShippingFrom)}` },
   { title: "دفع مرن", text: paymentLabels().join(" أو ") },
-  { title: "أصالة مضمونة", text: "عود ودهن عود مختار من أجود المصادر" },
+  { title: "أصالة مضمونة", text: "عود طبيعي مختار من أجود المصادر" },
   { title: "دعم مباشر", text: "نرد عليك عبر واتساب طوال أيام الأسبوع" },
 ];
 
@@ -25,7 +25,7 @@ export default function HomePage() {
           <p className="eyebrow">{store.fullName}</p>
           <h1>عبقٌ يبقى في المكان والذاكرة</h1>
           <p className="hero-text">
-            بخور معمول، عود طبيعي، دهن عود معتّق ومباخر فاخرة — اطلب بضغطة واحدة وادفع بالطريقة التي تناسبك.
+            عود كمبودي وهندي ومروكي مختار بعناية — اطلب بضغطة واحدة وادفع بالطريقة التي تناسبك.
           </p>
           <div className="hero-actions">
             <a href="#products" className="btn btn-gold">تسوّق الآن</a>
@@ -65,7 +65,7 @@ export default function HomePage() {
             <span className="eyebrow">عن {store.name}</span>
             <h2>رائحة الضيافة العربية في كل بيت</h2>
             <p>
-              في {store.name} نختار العود ونخلط المعمول بأيدٍ خبيرة، ونحرص أن يصلك المنتج كما لو اخترته بنفسك من سوق
+              في {store.name} نختار العود قطعةً قطعة بأيدٍ خبيرة، ونحرص أن يصلك المنتج كما لو اخترته بنفسك من سوق
               العطارين. للطلبات الخاصة والكميات وهدايا المناسبات تواصل معنا مباشرة.
             </p>
             <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="btn btn-wa">
