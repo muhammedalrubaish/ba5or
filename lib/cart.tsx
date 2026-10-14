@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCatalog } from "./catalog";
 import { MAX_QTY, type CartItem } from "./order";
-import { getProduct } from "./products";
+import { findProduct } from "./products";
 
 type CartContextValue = {
   items: CartItem[];
@@ -24,16 +25,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const catalog = useCatalog();
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      // نتجاهل أي منتج حُذف من المتجر بعد أن أضافه العميل لسلته
-      if (saved) setItems((JSON.parse(saved) as CartItem[]).filter((i) => getProduct(i.slug)));
+      // نتجاهل أي منتج حُذف أو أُخفي بعد أن أضافه العميل لسلته
+      if (saved) {
+        setItems(
+          (JSON.parse(saved) as CartItem[]).filter((i) => {
+            const p = findProduct(catalog, i.slug);
+            return p && !p.hidden;
+          })
+        );
+      }
     } catch {
       // التخزين غير متاح — نكمل بسلة فارغة
     }
     setReady(true);
+    // التحميل مرة واحدة عند فتح الصفحة
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -4,23 +4,25 @@ import { notFound } from "next/navigation";
 import { ProductArt } from "@/components/ProductArt";
 import { ProductCard } from "@/components/ProductCard";
 import { formatPrice } from "@/lib/config";
-import { getProduct, products } from "@/lib/products";
+import { getVisibleProducts } from "@/lib/db";
+import { findProduct } from "@/lib/products";
 import { BuyBox } from "./BuyBox";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await getVisibleProducts()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = getProduct((await params).slug);
+  const product = findProduct(await getVisibleProducts(), (await params).slug);
   if (!product) return {};
   return { title: product.name, description: product.short };
 }
 
 export default async function ProductPage({ params }: Props) {
-  const product = getProduct((await params).slug);
+  const products = await getVisibleProducts();
+  const product = findProduct(products, (await params).slug);
   if (!product) notFound();
   const related = products.filter((p) => p.slug !== product.slug && p.category === product.category).slice(0, 3);
   const more = related.length ? related : products.filter((p) => p.slug !== product.slug).slice(0, 3);

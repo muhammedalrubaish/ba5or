@@ -17,10 +17,15 @@ export type Product = {
   // لونان لخلفية التصميم المرسوم
   tint: [string, string];
   notes: string[];
+  // مخفي من المتجر (يبقى في لوحة التحكم)
+  hidden?: boolean;
 };
 
-// لإضافة منتج: انسخ أحد العناصر وغيّر slug (بالإنجليزية وبدون مسافات)، وضع صورته في public/products.
-export const products: Product[] = [
+export const categories: Product["category"][] = ["عود", "بخور", "دهن عود", "مباخر", "هدايا"];
+
+// المنتجات الأولية. بعد ربط قاعدة البيانات تُدار المنتجات من لوحة التحكم (/manager)
+// وتُستخدم هذه القائمة فقط إلى أن تحفظ أول تعديل.
+export const seedProducts: Product[] = [
   {
     slug: "oud-box",
     name: "عود كمبودي في صندوق فاخر",
@@ -82,6 +87,6 @@ export const products: Product[] = [
   },
 ];
 
-export function getProduct(slug: string) {
-  return products.find((p) => p.slug === slug);
+export function findProduct(catalog: Product[], slug: string) {
+  return catalog.find((p) => p.slug === slug);
 }

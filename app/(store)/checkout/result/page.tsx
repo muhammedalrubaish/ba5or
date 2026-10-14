@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { formatPrice, store } from "@/lib/config";
 import { fetchPayment, type MoyasarPayment } from "@/lib/moyasar";
+import { getCatalog, getOrder, updateOrder } from "@/lib/db";
 import { decodeItems, orderMessage, priceOrder } from "@/lib/order";
 import { PaidActions } from "./PaidActions";
 
@@ -44,11 +45,25 @@ export default async function ResultPage({ searchParams }: Props) {
   }
 
   const meta = payment.metadata ?? {};
-  const items = decodeItems(meta.items);
-  const order = priceOrder(items);
+  const ref = meta.order_ref || payment.id.slice(0, 8);
+  const saved = meta.order_ref ? await getOrder(meta.order_ref).catch(() => null) : null;
+  // سطور الطلب: من الطلب المحفوظ إن وُجد، وإلا نعيد حسابها من الكتالوج
+  const priced = priceOrder(decodeItems(meta.items), await getCatalog());
+  const lines = saved
+    ? saved.lines.map((l) => ({ key: l.slug, name: l.name, qty: l.qty, total: l.total }))
+    : priced.lines.map((l) => ({ key: l.product.slug, name: l.product.name, qty: l.qty, total: l.total }));
+  const expectedTotal = saved ? saved.total : priced.total;
   const isPaid = payment.status === "paid" || payment.status === "captured";
-  // نعيد حساب المبلغ من الكتالوج ونطابقه مع المبلغ المدفوع فعلاً
-  const amountMatches = payment.currency === store.currency && payment.amount === Math.round(order.total * 100);
+  // نطابق المبلغ المدفوع فعلاً مع قيمة الطلب
+  const amountMatches = payment.currency === store.currency && payment.amount === Math.round(expectedTotal * 100);
+
+  if (isPaid && saved && saved.status === "awaiting_payment") {
+    await updateOrder(saved.id, {
+      status: amountMatches ? "paid" : "awaiting_payment",
+      paymentId: payment.id,
+      adminNote: amountMatches ? saved.adminNote : `تنبيه: المبلغ المدفوع ${payment.amount / 100} لا يطابق قيمة الطلب`,
+    }).catch((err) => console.error("Failed to mark order paid", err));
+  }
 
   if (!isPaid) {
     return (
@@ -60,10 +75,12 @@ export default async function ResultPage({ searchParams }: Props) {
     );
   }
 
-  const ref = meta.order_ref || payment.id.slice(0, 8);
   const message = orderMessage({
     ref,
-    items,
+    lines,
+    subtotal: saved ? saved.subtotal : priced.subtotal,
+    shipping: saved ? saved.shipping : priced.shipping,
+    total: expectedTotal,
     customer: {
       name: meta.name || "",
       phone: meta.phone || "",
@@ -85,9 +102,9 @@ export default async function ResultPage({ searchParams }: Props) {
         <p className="alert">المبلغ المدفوع لا يطابق قيمة الطلب الحالية، سيراجع فريقنا الطلب ويتواصل معك.</p>
       )}
       <ul className="result-lines">
-        {order.lines.map((l) => (
-          <li key={l.product.slug}>
-            <span>{l.product.name} × {l.qty.toLocaleString("ar-SA")}</span>
+        {lines.map((l) => (
+          <li key={l.key}>
+            <span>{l.name} × {l.qty.toLocaleString("ar-SA")}</span>
             <span>{formatPrice(l.total)}</span>
           </li>
         ))}

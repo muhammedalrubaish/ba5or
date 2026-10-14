@@ -7,6 +7,7 @@ import { MoyasarForm } from "@/components/MoyasarForm";
 import { ProductArt } from "@/components/ProductArt";
 import { WhatsAppIcon } from "@/components/WhatsAppFloat";
 import { useCart } from "@/lib/cart";
+import { useCatalog } from "@/lib/catalog";
 import {
   bank,
   bankConfigured,
@@ -21,21 +22,16 @@ import {
 import {
   decodeItems,
   encodeItems,
-  isValidSaudiPhone,
-  newOrderRef,
-  normalizeDigits,
   orderMessage,
+  paymentMethodLabel,
   priceOrder,
+  validateCustomer,
   type Customer,
+  type PaymentMethod,
 } from "@/lib/order";
+import { placeOrder } from "./actions";
 
-type Method = "bank" | "online" | "cod";
-
-const methodLabel: Record<Method, string> = {
-  bank: "تحويل بنكي (آيبان)",
-  online: "دفع إلكتروني",
-  cod: "الدفع عند الاستلام",
-};
+type Method = PaymentMethod;
 type Step = "form" | "pay" | "done";
 
 const emptyCustomer: Customer = { name: "", phone: "", city: "", address: "", notes: "" };
@@ -44,9 +40,10 @@ export function CheckoutClient() {
   const params = useSearchParams();
   const buy = params.get("buy");
   const cart = useCart();
+  const catalog = useCatalog();
 
   const items = useMemo(() => (buy ? decodeItems(buy) : cart.items), [buy, cart.items]);
-  const order = priceOrder(items);
+  const order = priceOrder(items, catalog);
   const source = buy ? "quick" : "cart";
 
   const [customer, setCustomer] = useState<Customer>(emptyCustomer);
@@ -58,6 +55,8 @@ export function CheckoutClient() {
   const [ref, setRef] = useState("");
   const [waUrl, setWaUrl] = useState("");
   const [callbackUrl, setCallbackUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   if (!buy && !cart.ready) return <p className="muted">جارٍ التحميل…</p>;
 
@@ -128,26 +127,40 @@ export function CheckoutClient() {
     setCustomer((c) => ({ ...c, [field]: e.target.value }));
 
   function validate() {
-    const next: typeof errors = {};
-    if (customer.name.trim().length < 3) next.name = "اكتب الاسم الكامل";
-    if (!isValidSaudiPhone(customer.phone)) next.phone = "رقم جوال سعودي يبدأ بـ 05 (10 أرقام)";
-    if (!customer.city) next.city = "اختر المدينة";
-    if (customer.address.trim().length < 8) next.address = "اكتب العنوان بالتفصيل (الحي، الشارع)";
+    const next = validateCustomer(customer);
     setErrors(next);
     return Object.keys(next).length === 0;
   }
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
-    const orderRef = newOrderRef();
-    const cleanCustomer = { ...customer, phone: normalizeDigits(customer.phone).replace(/\s/g, "") };
+    if (submitting || !validate()) return;
+    setSubmitting(true);
+    setServerError("");
+    let placed: Awaited<ReturnType<typeof placeOrder>>;
+    try {
+      placed = await placeOrder({
+        items: order.lines.map((l) => ({ slug: l.product.slug, qty: l.qty })),
+        customer,
+        method,
+      });
+    } catch {
+      placed = { ok: false, error: "تعذر الاتصال. تحقق من الإنترنت وحاول مجدداً." };
+    }
+    setSubmitting(false);
+    if (!placed.ok) {
+      setServerError(placed.error);
+      return;
+    }
+    const orderRef = placed.ref;
+    const cleanCustomer = placed.customer;
     setCustomer(cleanCustomer);
     setRef(orderRef);
 
     if (method === "online") {
       const origin = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
       setCallbackUrl(`${origin.replace(/\/$/, "")}/checkout/result`);
+      setPaidTotal(placed.total);
       setStep("pay");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -155,20 +168,21 @@ export function CheckoutClient() {
 
     const message = orderMessage({
       ref: orderRef,
-      items: order.lines.map((l) => ({ slug: l.product.slug, qty: l.qty })),
+      lines: placed.lines,
+      subtotal: placed.subtotal,
+      shipping: placed.shipping,
+      total: placed.total,
       customer: cleanCustomer,
-      payment: methodLabel[method],
+      payment: paymentMethodLabel[method],
     });
     const url = whatsappLink(
       method === "bank" ? `${message}\n\n(سأرفق صورة إيصال التحويل)` : message
     );
     setWaUrl(url);
-    setPaidTotal(order.total);
+    setPaidTotal(placed.total);
     setStep("done");
     if (source === "cart") cart.clear();
     window.scrollTo({ top: 0 });
-    // في التحويل البنكي يرى العميل بيانات الحساب أولاً ثم يرسل الإيصال
-    if (method === "cod") window.open(url, "_blank", "noopener,noreferrer");
   }
 
   const itemsForPayment = order.lines.map((l) => ({ slug: l.product.slug, qty: l.qty }));
@@ -242,12 +256,15 @@ export function CheckoutClient() {
               </label>
             </div>
 
-            <button type="submit" className="btn btn-gold btn-block">
-              {method === "online"
+            {serverError && <p className="alert">{serverError}</p>}
+            <button type="submit" className="btn btn-gold btn-block" disabled={submitting}>
+              {submitting
+                ? "جارٍ تسجيل الطلب…"
+                : method === "online"
                 ? `متابعة للدفع · ${formatPrice(order.total)}`
                 : method === "bank"
                   ? `تأكيد الطلب · ${formatPrice(order.total)}`
-                  : "تأكيد الطلب عبر واتساب"}
+                  : "تأكيد الطلب"}
             </button>
           </form>
         ) : (
@@ -260,7 +277,7 @@ export function CheckoutClient() {
               الطلب {ref} · {customer.name} · {customer.city}
             </p>
             <MoyasarForm
-              amountHalalas={Math.round(order.total * 100)}
+              amountHalalas={Math.round(paidTotal * 100)}
               description={`طلب ${ref} من ${store.fullName}`}
               callbackUrl={callbackUrl}
               metadata={{

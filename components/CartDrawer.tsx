@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart";
+import { useCatalog } from "@/lib/catalog";
 import { formatPrice, store } from "@/lib/config";
 import { priceOrder } from "@/lib/order";
 import { ProductArt } from "./ProductArt";
@@ -10,7 +11,8 @@ import { QtyStepper } from "./QtyStepper";
 
 export function CartDrawer() {
   const { items, isOpen, close, setQty, remove } = useCart();
-  const { lines, subtotal, shipping, total } = priceOrder(items);
+  const catalog = useCatalog();
+  const { lines, subtotal, shipping, total } = priceOrder(items, catalog);
   const remaining = store.freeShippingFrom - subtotal;
 
   useEffect(() => {

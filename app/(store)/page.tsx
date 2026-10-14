@@ -2,7 +2,7 @@ import { LogoMark } from "@/components/Logo";
 import { ProductCard } from "@/components/ProductCard";
 import { WhatsAppIcon } from "@/components/WhatsAppFloat";
 import { formatPrice, paymentLabels, store, whatsappLink } from "@/lib/config";
-import { products } from "@/lib/products";
+import { getVisibleProducts } from "@/lib/db";
 
 const features = [
   { title: "شحن سريع", text: `لجميع مدن المملكة، ومجاني فوق ${formatPrice(store.freeShippingFrom)}` },
@@ -11,7 +11,8 @@ const features = [
   { title: "دعم مباشر", text: "نرد عليك عبر واتساب طوال أيام الأسبوع" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const products = await getVisibleProducts();
   return (
     <main>
       <section className="hero">
