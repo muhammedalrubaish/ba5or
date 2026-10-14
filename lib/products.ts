@@ -95,6 +95,21 @@ export const products: Product[] = [
     notes: ["خشبي", "منعش"],
   },
   {
+    slug: "oud-super",
+    name: "عود سوبر للتبخير",
+    short: "قطع عود متجانسة بلون فاتح ورائحة ناعمة",
+    description:
+      "قطع عود مقصوصة بحجم متقارب وسطح ناعم، تشتعل بهدوء وتعطي رائحة خشبية نظيفة تناسب التبخير اليومي واستقبال الضيوف.",
+    price: 120,
+    unit: "50 غرام",
+    category: "عود",
+    badge: "جديد",
+    art: "chips",
+    image: "/products/oud-super.jpg",
+    tint: ["#4a2b1a", "#b07a45"],
+    notes: ["خشبي", "ناعم"],
+  },
+  {
     slug: "taif-rose",
     name: "بخور الورد الطائفي",
     short: "معمول بماء الورد الطائفي والعود",
