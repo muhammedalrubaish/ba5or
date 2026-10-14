@@ -6,8 +6,23 @@ import type { Customer, PaymentMethod } from "./order";
 import { seedProducts, type Product } from "./products";
 import { defaultSettings, type StoreSettings } from "./settings";
 
-const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+// ربط Upstash من Vercel يُنشئ متغيرات بالشكل <PREFIX>_REST_API_URL و <PREFIX>_REST_API_TOKEN
+// والبادئة يختارها المستخدم (KV أو STORAGE أو غيرها)، فنقبل أي بادئة.
+function findUpstashEnv() {
+  const env = process.env;
+  if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) {
+    return { url: env.UPSTASH_REDIS_REST_URL, token: env.UPSTASH_REDIS_REST_TOKEN };
+  }
+  const prefixes = ["KV", "STORAGE", ...Object.keys(env).filter((k) => k.endsWith("_REST_API_URL")).map((k) => k.slice(0, -"_REST_API_URL".length))];
+  for (const p of prefixes) {
+    const url = env[`${p}_REST_API_URL`];
+    const token = env[`${p}_REST_API_TOKEN`];
+    if (url && token) return { url, token };
+  }
+  return { url: undefined, token: undefined };
+}
+
+const { url, token } = findUpstashEnv();
 
 export const dbEnabled = Boolean(url && token);
 const redis = dbEnabled ? new Redis({ url: url!, token: token! }) : null;
